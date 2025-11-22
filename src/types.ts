@@ -1,0 +1,39 @@
+export interface Vendor {
+  id?: number;
+  name: string;
+  base_url?: string;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Material {
+  id?: number;
+  name: string;
+  category?: string;
+  unit?: string;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface MaterialVendorLink {
+  id?: number;
+  material_id: number;
+  vendor_id: number;
+  sku?: string;
+  product_url?: string;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface PriceRecord {
+  id?: number;
+  material_id: number;
+  vendor_id: number;
+  price: number;
+  currency?: string;
+  unit?: string;
+  fetched_at: string;
+}
