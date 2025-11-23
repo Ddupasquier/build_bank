@@ -1,5 +1,5 @@
 import { ipcMain } from "electron";
-import { VendorsRepository } from "../db";
+import { VendorsRepository, VendorConfigsRepository } from "../db";
 
 export function registerVendorsIpc() {
   ipcMain.handle("vendors:list", () => VendorsRepository.list());
@@ -9,4 +9,8 @@ export function registerVendorsIpc() {
     VendorsRepository.delete(id);
     return { success: true };
   });
+  ipcMain.handle("vendors:config:get", (_event, vendorId: number) =>
+    VendorConfigsRepository.getByVendorId(vendorId)
+  );
+  ipcMain.handle("vendors:config:save", (_event, payload) => VendorConfigsRepository.upsert(payload));
 }

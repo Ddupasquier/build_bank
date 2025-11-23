@@ -54,3 +54,15 @@ export interface UpdatePricesResult {
 }
 
 export type LastUpdateResponse = string | null;
+
+export type SettingsKey = "location_zip";
+
+export interface VendorConfig {
+  id?: number;
+  vendor_id: number;
+  price_selectors?: string | null;
+  location_triggers?: string | null;
+  zip_inputs?: string | null;
+  store_result_selectors?: string | null;
+  search_url_template?: string | null;
+}

@@ -46,7 +46,4 @@ export function registerMaterialsIpc() {
     return { success: true };
   });
 
-  ipcMain.handle("settings:lastPriceUpdate", () => {
-    return SettingsRepository.getLastPriceUpdate();
-  });
 }

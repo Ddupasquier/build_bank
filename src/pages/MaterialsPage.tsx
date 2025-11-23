@@ -156,6 +156,16 @@ function MaterialCard({
     return map;
   }, [pricesQuery.data]);
 
+  const linkByVendor = useMemo(() => {
+    const map = new Map<number, string>();
+    (linksQuery.data || []).forEach((link) => {
+      if (link.vendor_id && link.product_url) {
+        map.set(link.vendor_id, link.product_url);
+      }
+    });
+    return map;
+  }, [linksQuery.data]);
+
   const cheapest = useMemo(() => {
     const entries = Array.from(byVendor.values());
     if (!entries.length) return null;
@@ -293,13 +303,27 @@ function MaterialCard({
             {vendors.map((v) => {
               const price = v.id ? byVendor.get(v.id) : undefined;
               if (!price) return null;
+              const href = v.id ? linkByVendor.get(v.id) : undefined;
               return (
                 <div
                   key={v.id}
                   className="flex items-center justify-between bg-slate-800/60 rounded px-2 py-1 text-sm"
                 >
                   <div>
-                    <div className="font-semibold">{v.name}</div>
+                    <div className="font-semibold">
+                      {href ? (
+                        <a
+                          href={href}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="underline underline-offset-2 hover:text-brand-300"
+                        >
+                          {v.name}
+                        </a>
+                      ) : (
+                        v.name
+                      )}
+                    </div>
                     <div className="text-xs text-slate-400">
                       {new Date(price.fetched_at).toLocaleString()}
                     </div>

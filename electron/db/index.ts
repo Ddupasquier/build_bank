@@ -77,6 +77,18 @@ export interface Alert {
   updated_at?: string;
 }
 
+export interface VendorConfig {
+  id?: number;
+  vendor_id: number;
+  price_selectors?: string | null;
+  location_triggers?: string | null;
+  zip_inputs?: string | null;
+  store_result_selectors?: string | null;
+  search_url_template?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
 let db: Database.Database | null = null;
 const LAST_UPDATE_KEY = "last_price_update";
 
@@ -149,6 +161,17 @@ const createTableStatements = [
     change_percent REAL,
     direction TEXT,
     enabled INTEGER DEFAULT 1,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`,
+  `CREATE TABLE IF NOT EXISTS vendor_configs (
+    id INTEGER PRIMARY KEY,
+    vendor_id INTEGER NOT NULL UNIQUE REFERENCES vendors(id) ON DELETE CASCADE,
+    price_selectors TEXT,
+    location_triggers TEXT,
+    zip_inputs TEXT,
+    store_result_selectors TEXT,
+    search_url_template TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`
@@ -349,5 +372,30 @@ export const SettingsRepository = {
   },
   setLastPriceUpdate(timestamp: string) {
     this.set(LAST_UPDATE_KEY, timestamp);
+  }
+};
+
+export const VendorConfigsRepository = {
+  getByVendorId(vendorId: number): VendorConfig | null {
+    return getDb()
+      .prepare("SELECT * FROM vendor_configs WHERE vendor_id = ?")
+      .get(vendorId) as VendorConfig | null;
+  },
+  upsert(config: VendorConfig): VendorConfig {
+    const timestamps = { created_at: now(), updated_at: now() };
+    getDb()
+      .prepare(
+        `INSERT INTO vendor_configs (vendor_id, price_selectors, location_triggers, zip_inputs, store_result_selectors, search_url_template, created_at, updated_at)
+         VALUES (@vendor_id, @price_selectors, @location_triggers, @zip_inputs, @store_result_selectors, @search_url_template, @created_at, @updated_at)
+         ON CONFLICT(vendor_id) DO UPDATE SET
+           price_selectors=excluded.price_selectors,
+           location_triggers=excluded.location_triggers,
+           zip_inputs=excluded.zip_inputs,
+           store_result_selectors=excluded.store_result_selectors,
+           search_url_template=excluded.search_url_template,
+           updated_at=excluded.updated_at`
+      )
+      .run({ ...config, ...timestamps });
+    return this.getByVendorId(config.vendor_id)!;
   }
 };

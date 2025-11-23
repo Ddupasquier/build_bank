@@ -10,7 +10,7 @@
     "dev:renderer": "vite build --watch",
     "dev:electron": "concurrently -k \"npm:dev:electron:build\" \"npm:dev:electron:start\"",
     "dev:electron:build": "tsc -p tsconfig.electron.json --watch",
-    "dev:electron:start": "cross-env ELECTRON_RUN_AS_NODE= wait-on dist/index.html electron/dist/main.js && electron .",
+    "dev:electron:start": "env -u ELECTRON_RUN_AS_NODE wait-on dist/index.html && env -u ELECTRON_RUN_AS_NODE electron .",
     "build": "npm run build:renderer && npm run build:electron",
     "build:renderer": "vite build",
     "build:electron": "tsc -p tsconfig.electron.json",

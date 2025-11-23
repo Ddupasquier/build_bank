@@ -4,7 +4,8 @@ import {
   Vendor,
   PriceRecord,
   UpdatePricesResult,
-  LastUpdateResponse
+  LastUpdateResponse,
+  SettingsKey
 } from "../types";
 
 async function invoke<T>(channel: string, ...args: unknown[]): Promise<T> {
@@ -32,5 +33,10 @@ export const ipcClient = {
   updateVendor: (id: number, data: Partial<Vendor>) => invoke<Vendor>("vendors:update", id, data),
   deleteVendor: (id: number) => invoke<{ success: boolean }>("vendors:delete", id),
   updateAllPrices: () => invoke<UpdatePricesResult>("scraping:updateAllPrices"),
-  getLastPriceUpdate: () => invoke<LastUpdateResponse>("settings:lastPriceUpdate")
+  getLastPriceUpdate: () => invoke<LastUpdateResponse>("settings:lastPriceUpdate"),
+  setSetting: (key: SettingsKey, value: string) => invoke<{ success: boolean }>("settings:set", key, value),
+  getSetting: (key: SettingsKey) => invoke<string | null>("settings:get", key),
+  getVendorConfig: (vendorId: number) => invoke<import("../types").VendorConfig | null>("vendors:config:get", vendorId),
+  saveVendorConfig: (config: import("../types").VendorConfig) =>
+    invoke<import("../types").VendorConfig>("vendors:config:save", config)
 };

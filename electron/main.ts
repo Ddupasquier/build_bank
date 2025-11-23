@@ -5,6 +5,7 @@ import { initDb } from "./db";
 import { registerMaterialsIpc } from "./ipcHandlers/materials";
 import { registerVendorsIpc } from "./ipcHandlers/vendors";
 import { registerScrapingIpc } from "./ipcHandlers/scraping";
+import { registerSettingsIpc } from "./ipcHandlers/settings";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -30,6 +31,7 @@ app.whenReady().then(() => {
   registerMaterialsIpc();
   registerVendorsIpc();
   registerScrapingIpc();
+  registerSettingsIpc();
   createWindow();
 
   app.on("activate", () => {
