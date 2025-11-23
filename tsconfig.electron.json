@@ -8,8 +8,10 @@
     "strict": true,
     "skipLibCheck": true,
     "outDir": "electron/dist",
-    "types": ["node", "electron"]
+    "rootDir": "electron",
+    "types": ["node", "electron"],
+    "declaration": false
   },
   "include": ["electron/**/*"],
-  "exclude": ["src", "dist"]
+  "exclude": ["electron/dist", "src", "dist"]
 }

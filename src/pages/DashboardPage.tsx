@@ -2,8 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 import { ipcClient } from "../api/ipcClient";
 
 export default function DashboardPage() {
-  const materialsQuery = useQuery(["materials"], ipcClient.listMaterials);
-  const vendorsQuery = useQuery(["vendors"], ipcClient.listVendors);
+  const materialsQuery = useQuery({
+    queryKey: ["materials"],
+    queryFn: ipcClient.listMaterials
+  });
+  const vendorsQuery = useQuery({
+    queryKey: ["vendors"],
+    queryFn: ipcClient.listVendors
+  });
 
   return (
     <div className="space-y-6">

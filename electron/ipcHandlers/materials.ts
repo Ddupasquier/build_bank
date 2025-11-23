@@ -1,5 +1,11 @@
 import { ipcMain } from "electron";
-import { MaterialsRepository, LinksRepository, getLatestPricesForMaterial } from "../db";
+import {
+  MaterialsRepository,
+  LinksRepository,
+  getLatestPricesForMaterial,
+  PricesRepository,
+  SettingsRepository
+} from "../db";
 
 export function registerMaterialsIpc() {
   ipcMain.handle("materials:list", () => {
@@ -23,6 +29,10 @@ export function registerMaterialsIpc() {
     return getLatestPricesForMaterial(materialId);
   });
 
+  ipcMain.handle("materials:history", (_event, materialId: number, vendorId: number, days: number) =>
+    PricesRepository.priceHistory(materialId, vendorId, days)
+  );
+
   ipcMain.handle("materials:links:list", (_event, materialId: number) => {
     return LinksRepository.listForMaterial(materialId);
   });
@@ -34,5 +44,9 @@ export function registerMaterialsIpc() {
   ipcMain.handle("materials:links:delete", (_event, id: number) => {
     LinksRepository.delete(id);
     return { success: true };
+  });
+
+  ipcMain.handle("settings:lastPriceUpdate", () => {
+    return SettingsRepository.getLastPriceUpdate();
   });
 }

@@ -37,3 +37,20 @@ export interface PriceRecord {
   unit?: string;
   fetched_at: string;
 }
+
+export interface UpdatePricesResult {
+  success: boolean;
+  updatedAt: string;
+  count: number;
+  failed?: number;
+  errors?: {
+    vendorId: number;
+    materialId: number;
+    vendorName: string;
+    materialName: string;
+    message: string;
+    url?: string;
+  }[];
+}
+
+export type LastUpdateResponse = string | null;

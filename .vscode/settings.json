@@ -1,0 +1,11 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "database": "/Users/dylandupasquier/Library/Application Support/BuildBank/buildbank.db",
+            "name": "build_bank_db"
+        }
+    ],
+    "sqltools.useNodeRuntime": true
+}

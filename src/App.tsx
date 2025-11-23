@@ -1,5 +1,6 @@
 import { Outlet, useLocation, Link } from "react-router-dom";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { ipcClient } from "./api/ipcClient";
 
 const navItems = [
   { label: "Dashboard", path: "/" },
@@ -12,6 +13,53 @@ const navItems = [
 export default function App() {
   const location = useLocation();
   const activePath = useMemo(() => location.pathname, [location.pathname]);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [updating, setUpdating] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [statusErrors, setStatusErrors] = useState<string[]>([]);
+
+  useEffect(() => {
+    ipcClient
+      .getLastPriceUpdate()
+      .then((val) => setLastUpdated(val))
+      .catch((err) => console.error("Failed to load last update", err));
+    const interval = setInterval(() => {
+      ipcClient
+        .getLastPriceUpdate()
+        .then((val) => setLastUpdated(val))
+        .catch((err) => console.error("Failed to refresh last update", err));
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleUpdatePrices = async () => {
+    setUpdating(true);
+    setStatusMessage(null);
+    setStatusErrors([]);
+    try {
+      const res = await ipcClient.updateAllPrices();
+      setLastUpdated(res.updatedAt);
+      if (res.failed && res.failed > 0) {
+        setStatusMessage(`Updated ${res.count} links with ${res.failed} errors.`);
+        const errs =
+          res.errors?.map(
+            (e) =>
+              `${e.vendorName || `Vendor ${e.vendorId}`} · ${e.materialName || `Material ${e.materialId}`}: ${
+                e.message
+              }${e.url ? ` (${e.url})` : ""}`
+          ) ?? [];
+        setStatusErrors(errs);
+        console.error("Price update errors", res.errors);
+      } else {
+        setStatusMessage(`Updated ${res.count} links successfully.`);
+      }
+    } catch (err) {
+      console.error("Price update failed", err);
+      setStatusMessage("Price update failed. Check logs for details.");
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -40,14 +88,32 @@ export default function App() {
             <div className="text-lg font-semibold text-slate-100">Material Price Intelligence</div>
             <div className="text-xs text-slate-400">Offline-first · Secure IPC</div>
           </div>
-          <div className="flex gap-3">
-            <button className="bg-brand-600 hover:bg-brand-700 text-sm px-4 py-2 rounded text-white">
-              Update prices now
+          <div className="flex gap-3 items-center">
+            <button
+              onClick={handleUpdatePrices}
+              className="bg-brand-600 hover:bg-brand-700 text-sm px-4 py-2 rounded text-white disabled:opacity-60"
+              disabled={updating}
+            >
+              {updating ? "Updating..." : "Update prices now"}
             </button>
-            <div className="text-xs text-slate-400">Last updated: —</div>
+            <div className="text-xs text-slate-400">
+              Last updated: {lastUpdated ? new Date(lastUpdated).toLocaleString() : "—"}
+            </div>
           </div>
         </header>
         <div className="p-6">
+          {statusMessage ? (
+            <div className="mb-3 text-xs text-slate-200 bg-slate-800 border border-slate-700 rounded px-3 py-2 space-y-1">
+              <div>{statusMessage}</div>
+              {statusErrors.length > 0 ? (
+                <ul className="list-disc list-inside text-amber-300 space-y-1">
+                  {statusErrors.map((e, idx) => (
+                    <li key={idx}>{e}</li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+          ) : null}
           <Outlet />
         </div>
       </main>

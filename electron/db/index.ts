@@ -78,6 +78,7 @@ export interface Alert {
 }
 
 let db: Database.Database | null = null;
+const LAST_UPDATE_KEY = "last_price_update";
 
 const createTableStatements = [
   `CREATE TABLE IF NOT EXISTS vendors (
@@ -327,3 +328,26 @@ export function getProjectCost(projectId: number) {
   const total = costLines.reduce((acc, line) => acc + line.lineTotal, 0);
   return { lines: costLines, total };
 }
+
+export const SettingsRepository = {
+  set(key: string, value: string) {
+    getDb()
+      .prepare(
+        `INSERT INTO settings (key, value) VALUES (@key, @value)
+         ON CONFLICT(key) DO UPDATE SET value=excluded.value`
+      )
+      .run({ key, value });
+  },
+  get(key: string) {
+    return getDb().prepare("SELECT value FROM settings WHERE key=?").get(key) as
+      | { value: string }
+      | undefined;
+  },
+  getLastPriceUpdate(): string | null {
+    const res = this.get(LAST_UPDATE_KEY);
+    return res?.value ?? null;
+  },
+  setLastPriceUpdate(timestamp: string) {
+    this.set(LAST_UPDATE_KEY, timestamp);
+  }
+};

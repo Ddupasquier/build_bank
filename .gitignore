@@ -1,0 +1,10 @@
+node_modules/
+dist/
+electron/dist/
+*.log
+.DS_Store
+build_bank_db.session.sql
+playwright-report/
+test-results/
+tmp/
+coverage/

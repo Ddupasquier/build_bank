@@ -5,15 +5,20 @@ import { Vendor } from "../types";
 
 export default function VendorsPage() {
   const queryClient = useQueryClient();
-  const vendorsQuery = useQuery(["vendors"], ipcClient.listVendors);
+  const vendorsQuery = useQuery({
+    queryKey: ["vendors"],
+    queryFn: ipcClient.listVendors
+  });
 
   const [form, setForm] = useState<Vendor>({ name: "", base_url: "", notes: "" });
 
-  const createMutation = useMutation(ipcClient.createVendor, {
-    onSuccess: () => queryClient.invalidateQueries(["vendors"])
+  const createMutation = useMutation({
+    mutationFn: ipcClient.createVendor,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["vendors"] })
   });
-  const deleteMutation = useMutation(ipcClient.deleteVendor, {
-    onSuccess: () => queryClient.invalidateQueries(["vendors"])
+  const deleteMutation = useMutation({
+    mutationFn: ipcClient.deleteVendor,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["vendors"] })
   });
 
   const onSubmit = (e: FormEvent) => {
@@ -78,7 +83,7 @@ export default function VendorsPage() {
             <button
               type="submit"
               className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded"
-              disabled={createMutation.isLoading}
+              disabled={createMutation.isPending}
             >
               Save vendor
             </button>

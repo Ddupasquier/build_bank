@@ -1,4 +1,11 @@
-import { Material, MaterialVendorLink, Vendor, PriceRecord } from "../types";
+import {
+  Material,
+  MaterialVendorLink,
+  Vendor,
+  PriceRecord,
+  UpdatePricesResult,
+  LastUpdateResponse
+} from "../types";
 
 async function invoke<T>(channel: string, ...args: unknown[]): Promise<T> {
   if (!window.electronAPI) throw new Error("electronAPI not available");
@@ -13,6 +20,8 @@ export const ipcClient = {
   deleteMaterial: (id: number) => invoke<{ success: boolean }>("materials:delete", id),
   getMaterialPrices: (materialId: number) =>
     invoke<PriceRecord[]>("materials:latestPrices", materialId),
+  getMaterialHistory: (materialId: number, vendorId: number, days: number) =>
+    invoke<PriceRecord[]>("materials:history", materialId, vendorId, days),
   listMaterialLinks: (materialId: number) =>
     invoke<MaterialVendorLink[]>("materials:links:list", materialId),
   createMaterialLink: (data: MaterialVendorLink) =>
@@ -21,5 +30,7 @@ export const ipcClient = {
   listVendors: () => invoke<Vendor[]>("vendors:list"),
   createVendor: (data: Vendor) => invoke<Vendor>("vendors:create", data),
   updateVendor: (id: number, data: Partial<Vendor>) => invoke<Vendor>("vendors:update", id, data),
-  deleteVendor: (id: number) => invoke<{ success: boolean }>("vendors:delete", id)
+  deleteVendor: (id: number) => invoke<{ success: boolean }>("vendors:delete", id),
+  updateAllPrices: () => invoke<UpdatePricesResult>("scraping:updateAllPrices"),
+  getLastPriceUpdate: () => invoke<LastUpdateResponse>("settings:lastPriceUpdate")
 };

@@ -20,8 +20,6 @@
       "@electron/*": ["electron/*"]
     }
   },
-  "include": ["src", "electron", "scripts", "vite.config.ts", "tailwind.config.ts"],
-  "references": [
-    { "path": "./tsconfig.electron.json" }
-  ]
+  "include": ["src", "scripts", "vite.config.ts", "tailwind.config.ts"],
+  "exclude": ["electron", "electron/dist"]
 }
